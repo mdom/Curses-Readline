@@ -22,10 +22,20 @@ sub curses_readline {
 
     while (1) {
 
-        ## What to do if outside of max_columns?
-
-        if ( $cursor_pos >= $columns ) {
-
+        ## cursor_pos and buffer_offset are zero-based, columns
+        ## start at one!
+        if ( $cursor_pos + 1 >= $columns ) {
+            $buffer_offset += int( $columns / 2 ) - 1;
+            $cursor_pos = int( $columns / 2 );
+        }
+        elsif ( $cursor_pos < 0 ) {
+            if ( $buffer_offset != 0 ) {
+                $buffer_offset -= int( $columns / 2 ) - 1;
+                $cursor_pos = int( $columns / 2 ) - 2;
+            }
+            else {
+                $cursor_pos = 0;
+            }
         }
 
         addstring( $lines - 1, 0,
@@ -39,11 +49,10 @@ sub curses_readline {
             last;
         }
         elsif ( $c eq KEY_LEFT ) {
-            next if $cursor_pos == 0;
             $cursor_pos--;
         }
         elsif ( $c eq KEY_RIGHT ) {
-            next if $cursor_pos == length($buffer);
+            next if $cursor_pos == length($buffer) - $buffer_offset;
             $cursor_pos++;
         }
         elsif ( $c eq KEY_HOME ) {
@@ -61,7 +70,7 @@ sub curses_readline {
             last;
         }
         else {
-            substr( $buffer, $cursor_pos, 0 ) = $c;
+            substr( $buffer, $buffer_offset + $cursor_pos, 0 ) = $c;
             $cursor_pos++;
         }
     }
