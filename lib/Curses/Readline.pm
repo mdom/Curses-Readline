@@ -45,7 +45,11 @@ sub curses_readline {
         refresh;
 
         my $c = getch;
-        if ( $c eq 'q' ) {
+        if ( $c eq "\cG" ) {
+            $buffer = undef;
+            last;
+        }
+        elsif ( $c eq "\n" ) {
             last;
         }
         elsif ( $c eq KEY_LEFT ) {
@@ -65,9 +69,6 @@ sub curses_readline {
             next if $cursor_pos == 0;
             $cursor_pos--;
             substr( $buffer, $cursor_pos, 1 ) = '';
-        }
-        elsif ( $c eq "\n" ) {
-            last;
         }
         else {
             substr( $buffer, $buffer_offset + $cursor_pos, 0 ) = $c;

@@ -45,17 +45,17 @@ my $buffer = ' ' x 100;
     };
 }
 
-@input = ( qr/^:@/, 'q' );
+@input = ( qr/^:@/, "\n" );
 
-$rc = curses_readline();
-is( $rc, '' );
+is( curses_readline(), '' );
 
-@input =
-  ( 'a', 'b', 'c', 'd', 'e', 'f', qr/^:abcdef@/, KEY_LEFT, qr/^:abcde\@f/,
-    'q' );
+@input = ( 'abcdef', qr/^:abcdef@/, KEY_LEFT, qr/^:abcde\@f/, '12', "\n" );
 
-$rc = curses_readline();
-is( $rc, 'abcdef' );
+is( curses_readline(), 'abcde12f' );
+
+@input = ( 'The quick brown fox jumps over the lazy dog', "\n" );
+
+is( curses_readline(), 'The quick brown fox jumps over the lazy dog' );
 
 done_testing;
 
