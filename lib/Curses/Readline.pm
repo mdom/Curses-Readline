@@ -20,18 +20,20 @@ sub curses_readline {
     move( $lines + 1, $columns );
     addstring( $lines - 1, 0, ":" );
 
+    my $half_width = int( $columns / 2 );
+
     while (1) {
 
         ## cursor_pos and buffer_offset are zero-based, columns
         ## start at one!
         if ( $cursor_pos + 1 >= $columns ) {
-            $buffer_offset += int( $columns / 2 ) - 1;
-            $cursor_pos = int( $columns / 2 );
+            $buffer_offset += $half_width - 1;
+            $cursor_pos = $half_width;
         }
         elsif ( $cursor_pos < 0 ) {
             if ( $buffer_offset != 0 ) {
-                $buffer_offset -= int( $columns / 2 ) - 1;
-                $cursor_pos = int( $columns / 2 ) - 2;
+                $buffer_offset -= $half_width - 1;
+                $cursor_pos = $half_width - 2;
             }
             else {
                 $cursor_pos = 0;
