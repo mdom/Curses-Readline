@@ -7,7 +7,7 @@ use Test::More;
 use Curses::Readline 'curses_readline';
 use Curses;
 
-my $columns = 10;
+my $columns = 20;
 my $rows    = 1;
 
 my $rc;
@@ -59,7 +59,15 @@ is( curses_readline(), '' );
 
 is( curses_readline(), 'abcde12f' );
 
-@input = ( 'The quick brown fox jumps over the lazy dog', "\n" );
+@input = (
+    'The quick brown fox jumps over the lazy dog',
+    qr/^:ver the lazy dog@/,
+    KEY_HOME,
+    qr/^:\@The quick brown fox/,
+    KEY_END,
+    qr/^: over the lazy dog\@/,
+    "\n"
+);
 
 is( curses_readline(), 'The quick brown fox jumps over the lazy dog' );
 

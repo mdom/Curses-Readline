@@ -62,10 +62,18 @@ sub curses_readline {
             $cursor_pos++;
         }
         elsif ( $c eq KEY_HOME ) {
-            $cursor_pos = 0;
+            $cursor_pos    = 0;
+            $buffer_offset = 0;
         }
         elsif ( $c eq KEY_END ) {
-            $cursor_pos = length($buffer);
+            my $l = length($buffer);
+            if ( $l >= $columns ) {
+                $buffer_offset = $l - $columns + 2;
+                $cursor_pos    = $columns - 2;
+            }
+            else {
+                $cursor_pos = $l;
+            }
         }
         elsif ( $c eq KEY_BACKSPACE ) {
             next if $cursor_pos == 0;
