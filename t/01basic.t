@@ -32,9 +32,15 @@ my $buffer = ' ' x 100;
 
     *Curses::Readline::getch = sub {
         my $val = shift @input;
+        return if !$val;
         if ( ref($val) eq 'Regexp' ) {
             like( $buffer, $val );
             return shift @input;
+        }
+        if ( length($val) != 1 ) {
+            my ( $val, @rest ) = split( '', $val );
+            unshift @input, @rest;
+            return $val;
         }
         return $val;
     };
