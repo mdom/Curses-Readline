@@ -61,11 +61,11 @@ sub curses_readline {
             next if $cursor_pos == length($buffer) - $buffer_offset;
             $cursor_pos++;
         }
-        elsif ( $c eq KEY_HOME ) {
+        elsif ( $c eq KEY_HOME || $c eq "\cA" ) {
             $cursor_pos    = 0;
             $buffer_offset = 0;
         }
-        elsif ( $c eq KEY_END ) {
+        elsif ( $c eq KEY_END || $c eq "\cE" ) {
             my $l = length($buffer);
             if ( $l >= $columns ) {
                 $buffer_offset = $l - $columns + 2;
