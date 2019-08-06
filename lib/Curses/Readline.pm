@@ -76,9 +76,9 @@ sub curses_readline {
             }
         }
         elsif ( $c eq KEY_BACKSPACE ) {
-            next if $cursor_pos == 0;
+            next if $buffer_offset == 0 && $cursor_pos == 0;
             $cursor_pos--;
-            substr( $buffer, $cursor_pos, 1 ) = '';
+            substr( $buffer, $buffer_offset + $cursor_pos, 1 ) = '';
         }
         else {
             substr( $buffer, $buffer_offset + $cursor_pos, 0 ) = $c;
