@@ -28,7 +28,7 @@ sub curses_readline {
         ## start at one!
         if ( $cursor_pos + 1 >= $columns ) {
             $buffer_offset += $half_width - 1;
-            $cursor_pos = $half_width;
+            $cursor_pos = length($buffer) - $buffer_offset;
         }
         elsif ( $cursor_pos < 0 ) {
             if ( $buffer_offset != 0 ) {
