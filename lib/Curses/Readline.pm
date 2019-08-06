@@ -65,6 +65,9 @@ sub curses_readline {
             $cursor_pos    = 0;
             $buffer_offset = 0;
         }
+        elsif ( $c eq "\cK" ) {
+            substr( $buffer, $buffer_offset + $cursor_pos ) = '';
+        }
         elsif ( $c eq KEY_END || $c eq "\cE" ) {
             my $l = length($buffer);
             if ( $l >= $columns ) {
