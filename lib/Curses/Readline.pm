@@ -80,6 +80,9 @@ sub curses_readline {
             $cursor_pos--;
             substr( $buffer, $buffer_offset + $cursor_pos, 1 ) = '';
         }
+        elsif ( $c eq "\cD" ) {
+            substr( $buffer, $buffer_offset + $cursor_pos, 1 ) = '';
+        }
         else {
             substr( $buffer, $buffer_offset + $cursor_pos, 0 ) = $c;
             $cursor_pos++;
