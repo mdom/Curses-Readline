@@ -5,6 +5,7 @@ use warnings;
 use lib 'lib';
 use Curses::Readline qw(curses_readline);
 use Curses;
+use Encode;
 
 initscr;
 noecho;
@@ -15,6 +16,6 @@ my $result = curses_readline;
 
 endwin;
 
-print $result . "\n";
+print encode('utf8',$result) . "\n";
 
 exit 0;

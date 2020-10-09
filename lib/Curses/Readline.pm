@@ -11,45 +11,52 @@ our @EXPORT_OK = 'curses_readline';
 our $VERSION = '0.9';
 
 sub curses_readline {
-    my ($prefix) = @_;
+    my ( $prefix, $line, $column ) = @_;
     $prefix //= ':';
 
     my $buffer        = '';
-    my $cursor_pos    = 0;
     my $buffer_offset = 0;
 
     my ( $lines, $columns );
     getmaxyx( $lines, $columns );
-    move( $lines + 1, $columns );
-    addstring( $lines - 1, 0, ":" );
 
-    my $half_width = int( $columns / 2 );
+    my $max_columns = $columns;
+
+    ## TODO lenght() is wrong for non-ascii characters;
+    ## to compute display length, just insert it into a pad and
+    ## check how much the cursor moved.
+
+    my $left_pad  = length($prefix);
+    my $right_pad = 1;                 # for cursor
+
+    my $max_display  = $max_columns - $left_pad - $right_pad;
+    my $half_display = int( $max_display / 2 );
 
     while (1) {
 
-        ## cursor_pos and buffer_offset are zero-based, columns
-        ## start at one!
-        if ( $cursor_pos + 1 >= $columns ) {
-            $buffer_offset += $half_width - 1;
-            $cursor_pos = length($buffer) - $buffer_offset;
+        my $substr_start = 0;
+
+		if ( $buffer_offset < 0 )  {
+			$buffer_offset = 0;
+		}
+
+        if ( $buffer_offset > $max_display ) {
+            $substr_start =
+              int( $buffer_offset / $half_display ) * $half_display -
+              $half_display - 1 -
+              ( $half_display % 2 );
         }
-        elsif ( $cursor_pos < 0 ) {
-            if ( $buffer_offset != 0 ) {
-                $buffer_offset -= $half_width - 1;
-                $cursor_pos = $half_width - 2;
-            }
-            else {
-                $cursor_pos = 0;
-            }
-        }
+
+        my $cursor_pos = $buffer_offset - $substr_start;
 
         addstring( $lines - 1, 0,
-            "$prefix" . substr( $buffer, $buffer_offset, $columns - 1 ) );
+            $prefix . substr( $buffer, $substr_start, $max_display ) );
         clrtoeol;
-        move( $lines - 1, $cursor_pos + 1 );
-        refresh;
 
-        my $c = getch;
+        move( $lines - 1, $cursor_pos + $left_pad );
+
+        my $c = getchar();
+
         if ( $c eq "\cG" ) {
             $buffer = undef;
             last;
@@ -58,44 +65,37 @@ sub curses_readline {
             last;
         }
         elsif ( $c eq KEY_LEFT ) {
-            $cursor_pos--;
+            $buffer_offset--;
         }
         elsif ( $c eq KEY_RIGHT ) {
-            next if $cursor_pos == length($buffer) - $buffer_offset;
-            $cursor_pos++;
+            next if $buffer_offset == length($buffer);
+            $buffer_offset++;
         }
         elsif ( $c eq KEY_HOME || $c eq "\cA" ) {
-            $cursor_pos    = 0;
             $buffer_offset = 0;
         }
         elsif ( $c eq "\cK" ) {
-            substr( $buffer, $buffer_offset + $cursor_pos ) = '';
+            substr( $buffer, $buffer_offset ) = '';
         }
         elsif ( $c eq KEY_END || $c eq "\cE" ) {
-            my $l = length($buffer);
-            if ( $l >= $columns ) {
-                $buffer_offset = $l - $columns + 2;
-                $cursor_pos    = $columns - 2;
-            }
-            else {
-                $cursor_pos = $l;
-            }
+            $buffer_offset = length($buffer);
         }
         elsif ( $c eq KEY_BACKSPACE ) {
-            next if $buffer_offset == 0 && $cursor_pos == 0;
-            $cursor_pos--;
-            substr( $buffer, $buffer_offset + $cursor_pos, 1 ) = '';
+            next if $buffer_offset == 0;
+            substr( $buffer, $buffer_offset - 1, 1 ) = '';
+            $buffer_offset--;
         }
         elsif ( $c eq "\cD" ) {
-            substr( $buffer, $buffer_offset + $cursor_pos, 1 ) = '';
+            substr( $buffer, $buffer_offset, 1 ) = '';
         }
         else {
-            substr( $buffer, $buffer_offset + $cursor_pos, 0 ) = $c;
-            $cursor_pos++;
+            substr( $buffer, $buffer_offset, 0 ) = $c;
+            $buffer_offset++;
         }
     }
     move( $lines - 1, 0 );
     clrtoeol;
+    refresh;
     return $buffer;
 }
 
