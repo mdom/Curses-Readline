@@ -16,6 +16,11 @@ my $result = curses_readline;
 
 endwin;
 
+if ( not defined $result ) {
+	warn "Could not read line!\n";
+	exit 1;
+}
+
 print encode('utf8',$result) . "\n";
 
 exit 0;

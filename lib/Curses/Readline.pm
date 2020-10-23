@@ -29,16 +29,24 @@ sub curses_readline {
     my $left_pad  = length($prefix);
     my $right_pad = 1;                 # for cursor
 
+    if ( $left_pad + $right_pad >= $max_columns ) {
+        return;
+    }
+
     my $max_display  = $max_columns - $left_pad - $right_pad;
     my $half_display = int( $max_display / 2 );
+
+    if ( $half_display == 0 ) {
+        return;
+    }
 
     while (1) {
 
         my $substr_start = 0;
 
-		if ( $buffer_offset < 0 )  {
-			$buffer_offset = 0;
-		}
+        if ( $buffer_offset < 0 ) {
+            $buffer_offset = 0;
+        }
 
         if ( $buffer_offset > $max_display ) {
             $substr_start =
